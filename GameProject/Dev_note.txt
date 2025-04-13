@@ -1,0 +1,118 @@
+ГЛАВНАЯ ЗАМЕТКА, НА ВТОРОЙ СЕЗОН ОТКАЖИСЬ ОТ telepot , херня полная
+День 1.
+Прощуена разработка 10 дней, но продолжим отсюда. Уже готов, класс игрока, гоблина, обработчик команд нормально
+воспринимает текстовые и каллбэк команды, сценарий растет. Столкнулся с проблемой, как реализовать бой с монстром
+для теста я создал гоблина, он вызывается и я не могу его атаковать.
+
+Что бы динамический генератор работал верно, пришлось разделить то что игрок может использовать, а что у него просто лежит
+в инвентаре
+{'id': '4147873382257368920', 'from':
+{'id': 965752029, 'is_bot': False, 'first_name': 'Suo', 'last_name': 'In', 'username': 'suoin', 'language_code': 'ru'},
+'message': {'message_id': 9519, 'from':
+{'id': 8120405105, 'is_bot': True, 'first_name': 'ExperementBot', 'username': 'Suoin_bot'},
+'chat': {'id': 965752029, 'first_name': 'Suo', 'last_name': 'In', 'username': 'suoin', 'type': 'private'},
+'date': 1734065244, 'text': 'Имя :Малый гоблин\nЗдоровье: 50\nМана: 1\nСила: 5\nЛовкость: 5\nИнтеллект: 5\nСпособности: Коварный удар', 'reply_markup':
+{'inline_keyboard': [[{'text': 'Использовать Меч-палка', 'callback_data': 'Меч-палка'}]]}},
+'chat_instance': '2416553812463339162', 'data': 'Меч-палка'}
+Полученные данные callback: Меч-палка
+
+День 3 .
+я продолжаю эксперементы с механизмом боя, сделать обычную бродилку ветвления с ключами , не так интересно как напряженные битвы
+по ходу прождения по миру. Пока либо создается монстр глобально для всех игроков, либо передается текстовый ключ, а не вызов объекта
+
+День 12, Я наконец то сделал гребаный обработчик боя, который может обрабатывать всех монстров, а не одного, остается сделать шлифоку, баланс и сюжет
+
+День 14. Я жестко ошибался что сделал, еще 2 дня калибровки и настройки, чтоб выдавал нужный результат, теперь он и правда работает так, как я хочу!!!
+Дело за сюжетом и балансом, в планах реализовать выход в город и скрытый квест если дрался с гоблином, квест на убийство слаймов пока с заглушкой
+
+День 15. Работаю над реализациия рынка
+def find_market(chat_id, message_id, data):
+    bot.deleteMessage((chat_id, message_id))  # Удаляем предыдущее сообщение
+
+    player_inventory = player[chat_id].quest_invetary  # Инвентарь игрока
+    player_money = player[chat_id].money  # Деньги игрока
+
+    keyboard = {'inline_keyboard': []}  # Создаем клавиатуру
+    button_row = []  # Текущий ряд кнопок
+    message_text = "Ваши предметы:\n\n"  # Сообщение для игрока
+
+    # Проверка на наличие предметов в инвентаре
+    if player_inventory:
+        for item, price in player_inventory.items():
+            message_text += f"**{item}** : Цена : {price}\n"
+            callback = f"sell_{item}"
+            button_row.append({'text': f"Продать {item}", 'callback_data': callback})
+
+            # Добавляем кнопки по 2 в ряд
+            if len(button_row) == 2:
+                keyboard['inline_keyboard'].append(button_row)
+                button_row = []
+
+        # Добавляем оставшиеся кнопки
+        if button_row:
+            keyboard['inline_keyboard'].append(button_row)
+
+    # Если есть деньги, добавляем кнопку "Купить"
+    if player_money > 0:
+        keyboard['inline_keyboard'].append(
+            [{'text': 'Купить', 'callback_data': 'buy_item'}]
+        )
+
+    # Если деньги и инвентарь пусты, кнопка "Уйти"
+    if not player_inventory and player_money == 0:
+        keyboard['inline_keyboard'].append(
+            [{'text': 'Уйти', 'callback_data': 'leave_market'}]
+        )
+    else:
+        # В противном случае добавляем кнопку "Уйти"
+        keyboard['inline_keyboard'].append(
+            [{'text': 'Уйти', 'callback_data': 'leave_market'}]
+        )
+
+    # Отправляем сообщение с кнопками
+    bot.sendMessage(chat_id, message_text, reply_markup=keyboard)
+
+
+# Обработчик для продажи предмета
+def handle_sell_item(chat_id, item):
+    if item in player[chat_id].quest_invetary:
+        price = player[chat_id].quest_invetary.pop(item)  # Удаляем предмет и получаем его цену
+        player[chat_id].money += price  # Добавляем деньги
+        find_market(chat_id, None, None)  # Вызываем функцию заново для обновления
+    else:
+        bot.sendMessage(chat_id, "Этот предмет больше недоступен!")
+
+
+# Пример обработки callback_data
+def handle_callback(chat_id, message_id, callback_data):
+    if callback_data.startswith("sell_"):
+        item = callback_data.replace("sell_", "")
+        handle_sell_item(chat_id, item)
+    elif callback_data == "buy_item":
+        bot.sendMessage(chat_id, "Открыт раздел покупки!")
+        # Логика для покупки
+    elif callback_data == "leave_market":
+        bot.sendMessage(chat_id, "Вы покидаете рынок.")
+"""
+
+День 16 , уже 20 декабря 2024 года
+Я продолжаю работать над рынком
+
+День 20, рынок был наконец то завершен, пришлось сделать псевдорынок через флаги и множество элифов, оставлю это на 2 сезон
+там будет полноценный рынок
+  if 'Странный амулет' in player[chat_id].quest_invetary:
+        text =('Вы проследовали за группой в балахонах, они скрылись за поворотом\n'
+               'Как только вы решили последовать за ними, как почувствовали что найденый амулет начал вибрировать\n'
+               'словно прося вас немного подождать')
+        add_button = [[{'text':'Подождать', 'callback_data':'wait_a'}]]
+    else:
+        text ='Вы проследовали за группой в балахонах, они скрылись за поворотом'
+        add_button = []
+    keyboard = {
+        'inline_keyboard':[
+            [{'text':'Уйти','callback_data':'back_off'},{'text':'Следовать за ними','callback_data':'foward_death'}]
+        ]+ add_button
+    }
+День 21, занимаюсь скрытым квестом на гоблинское гнездо
+
+День 32 . я закончил гнездо гоблинов и уже доделываю первый квест на слизь, после чего я буду сводить это в единую часть и начнется основной сюжет
