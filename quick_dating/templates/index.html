@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1 class="text-center mb-4">Объявления</h1>
+    <div class="row justify-content-center">
+        {% for ad in ads %}
+            <div class="col-md-6 mb-3">
+                <div class="card shadow-sm border-0 rounded">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ ad.gender }}, {{ ad.age }} лет, {{ ad.city }}</h5>
+                        <p class="card-text">{{ ad.text }}</p>
+                        <a href="{{ url_for('respond', ad_id=ad.id) }}" class="btn btn-outline-primary rounded-pill">Ответить</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Popup (Modal) для email -->
+    {% if 'verified_email' not in session %}
+        <div class="modal fade show d-block" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Подтвердите email</h5>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="{{ url_for('verify_email') }}">
+                            {{ form.hidden_tag() }}
+                            <div class="mb-3">
+                                {{ form.email.label(class="form-label") }}
+                                {{ form.email(class="form-control") }}
+                            </div>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

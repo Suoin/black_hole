@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1 class="text-center">Панель модератора</h1>
+    {% if ads %}
+        {% for ad in ads %}
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <p>{{ ad.text }}</p>
+                    <form method="post">
+                        <input type="hidden" name="ad_id" value="{{ ad.id }}">
+                        <button type="submit" name="action" value="approve" class="btn btn-success rounded-pill">Опубликовать</button>
+                        <button type="submit" name="action" value="reject" class="btn btn-danger rounded-pill">Отклонить</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-center">Нет объявлений на модерации.</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+```
+# Python virtual environment
+venv/
+.env/
+
+# SQLite database
+database.db
+
+# PyCharm project files
+.idea/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables and secrets
+*.env
+
+
+# Other temporary files
+*.log
+*.cache
+*.DS_Store  # Для macOS
+```
